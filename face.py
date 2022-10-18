@@ -55,6 +55,7 @@ while True:
 
         if len(face_locations) == 0 and time_elapsed > 60:
             last_seen.clear()
+            interval_start_time = time.time()  # Reset the time interval
             continue
 
         face_encodings = face_recognition.face_encodings(
