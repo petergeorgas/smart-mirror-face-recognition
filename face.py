@@ -1,4 +1,5 @@
 import time
+import os
 import face_recognition
 import cv2
 import numpy as np
@@ -6,17 +7,22 @@ import numpy as np
 # Get a reference to webcam #0 (the default one)
 video_capture = cv2.VideoCapture(0)
 
-# Load a sample picture and learn how to recognize it.
-peter_image = face_recognition.load_image_file("faces/Peter Georgas.jpg")
-peter_face_enc = face_recognition.face_encodings(peter_image)[0]
 
-# Load a second sample picture and learn how to recognize it.
-bill_image = face_recognition.load_image_file("faces/Wild Bill.jpg")
-bill_face_enc = face_recognition.face_encodings(bill_image)[0]
+face_files = os.listdir("faces")
 
-# Create arrays of known face encodings and their names
-known_face_encodings = [peter_face_enc, bill_face_enc]
-known_face_names = ["Peter Georgas", "Wild Bill"]
+known_face_encodings = []
+known_face_names = []
+
+# Load in our faces
+for file in face_files:
+    file_name = os.path.splitext(file)[0]
+
+    img = face_recognition.load_image_file(os.path.join("faces", file))
+    img_face_enc = face_recognition.face_encodings(img)[0]
+
+    known_face_names.append(file_name)
+    known_face_encodings.append(img_face_enc)
+
 
 # Initialize some variables
 face_locations = []
