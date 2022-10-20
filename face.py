@@ -1,10 +1,12 @@
 import time
+import requests
 import os
 import face_recognition
 import cv2
 import numpy as np
 
 # Get a reference to webcam #0 (the default one)
+
 video_capture = cv2.VideoCapture(0)
 
 
@@ -86,7 +88,9 @@ while True:
 
                 if name not in last_seen:
                     last_seen.add(name)
+                    print(f"i see {name}")
                     print("sending request!")
+                    requests.post("http://localhost:8080/face", json={"id": name})
 
             face_names.append(name)
 
