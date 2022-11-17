@@ -32,6 +32,11 @@ face_encodings = []
 face_names = []
 process_this_frame = True
 
+name_map = {
+    "Peter Georgas": {"name": "Peter", "id": "RQQo7YZKGeT1EHgZPP1mMg2twJh2"},
+    "Wild Bill": {"name": "William", "id": "GAnmE0SGijVVPkV2a5gZyZm65753"},
+}
+
 last_seen = None
 
 interval_start_time = time.time()
@@ -91,8 +96,9 @@ while True:
                     last_seen = name
                     print(f"i see {name}")
                     print("sending request!")
-                    requests.post("http://localhost:8080/face", json={"id": name})
+                    requests.post("http://localhost:8080/face", json=name_map[name])
                     face_found = True
+                    break
                 else:
                     face_found = True
 
