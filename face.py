@@ -32,7 +32,7 @@ face_encodings = []
 face_names = []
 process_this_frame = True
 
-last_seen = set()
+last_seen = None
 
 interval_start_time = time.time()
 
@@ -42,6 +42,7 @@ while True:
 
     # Only process every other frame of video to save time
     if process_this_frame:
+        face_found = False
         # Resize frame of video to 1/5 size for faster face recognition processing
         small_frame = cv2.resize(frame, (0, 0), fx=0.2, fy=0.2)
 
@@ -56,7 +57,7 @@ while True:
         time_elapsed = curr_time - interval_start_time
 
         if len(face_locations) == 0 and time_elapsed > 60:
-            last_seen.clear()
+            last_seen = None
             interval_start_time = time.time()  # Reset the time interval
             continue
 
@@ -86,18 +87,26 @@ while True:
             if matches[best_match_index]:
                 name = known_face_names[best_match_index]
 
-                if name not in last_seen:
-                    last_seen.add(name)
+                if name != last_seen:
+                    last_seen = name
                     print(f"i see {name}")
                     print("sending request!")
                     requests.post("http://localhost:8080/face", json={"id": name})
+                    face_found = True
+                else:
+                    face_found = True
 
             face_names.append(name)
 
     process_this_frame = not process_this_frame
+    if face_found:
+        print("timer started")
+        time.sleep(60)
+        print("timer expired")
 
     # This will not need to be displayed in actual implementation
 
+    """
     # Display the results
     for (top, right, bottom, left), name in zip(face_locations, face_names):
         ## Scale back up face locations since the frame we detected in was scaled to 1/5 size
@@ -123,6 +132,7 @@ while True:
     # Hit 'q' on the keyboard to quit!
     if cv2.waitKey(1) & 0xFF == ord("q"):
         break
+    """
 
 
 # Release handle to the webcam
