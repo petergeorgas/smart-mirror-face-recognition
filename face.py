@@ -57,20 +57,30 @@ while True:
         # Find all the faces and face encodings in the current frame of video
         face_locations = face_recognition.face_locations(rgb_small_frame)
 
-        curr_time = time.time()
-
-        time_elapsed = curr_time - interval_start_time
-
-        if len(face_locations) == 0 and time_elapsed > 60:
+        """
+        if len(face_locations) == 0 and time_elapsed > 15:
             last_seen = None
             interval_start_time = time.time()  # Reset the time interval
             continue
+        """
 
         face_encodings = face_recognition.face_encodings(
             rgb_small_frame, face_locations
         )
 
         face_names = []
+
+        if len(face_encodings) == 0:  # No faces found
+            face_found = False
+            now = time.time()
+            time_elapsed = now - interval_start_time
+            if time_elapsed > 15:
+                print("sending reset")
+                reset = {"name": "reset", "id": "reset"}
+                requests.post("http://localhost:8080/face", json=reset)
+                last_seen = None
+                interval_start_time = time.time()
+
         for face_encoding in face_encodings:
             # See if the face is a match for the known face(s)
             matches = face_recognition.compare_faces(
@@ -79,11 +89,33 @@ while True:
 
             name = "Unknown"
 
-            # # If a match was found in known_face_encodings, just use the first one.
-            # if True in matches:
-            #     first_match_index = matches.index(True)
-            #     name = known_face_names[first_match_index]
+            # If a match was found in known_face_encodings, just use the first one.
+            if True in matches:
+                first_match_index = matches.index(True)
+                name = known_face_names[first_match_index]
 
+                if name != last_seen:
+                    last_seen = name
+                    print(f"i see {name}")
+                    print("sending request!")
+                    requests.post("http://localhost:8080/face", json=name_map[name])
+                    face_found = True
+                    break
+                else:
+                    face_found = True
+            else:  # No match found
+                now = time.time()
+                time_elapsed = now - interval_start_time
+                if time_elapsed > 15:
+                    print("sending reset")
+                    reset = {"name": "reset", "id": "reset"}
+                    requests.post("http://localhost:8080/face", json=reset)
+                    last_seen = None
+                    interval_start_time = time.time()
+
+            face_names.append(name)
+
+            """
             # Or instead, use the known face with the smallest distance to the new face
             face_distances = face_recognition.face_distance(
                 known_face_encodings, face_encoding
@@ -96,19 +128,21 @@ while True:
                     last_seen = name
                     print(f"i see {name}")
                     print("sending request!")
-                    requests.post("http://localhost:8080/face", json=name_map[name])
+                    # requests.post("http://localhost:8080/face", json=name_map[name])
                     face_found = True
                     break
                 else:
                     face_found = True
 
             face_names.append(name)
+            """
 
     process_this_frame = not process_this_frame
     if face_found:
         print("timer started")
-        time.sleep(60)
+        time.sleep(15)
         print("timer expired")
+        face_found = False
 
     # This will not need to be displayed in actual implementation
 
