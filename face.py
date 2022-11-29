@@ -77,6 +77,7 @@ while True:
             if time_elapsed > 15:
                 print("sending reset")
                 reset = {"name": "reset", "id": "reset"}
+                requests.post("http://localhost:8080/face", json=reset)
                 interval_start_time = time.time()
 
         for face_encoding in face_encodings:
@@ -96,7 +97,7 @@ while True:
                     last_seen = name
                     print(f"i see {name}")
                     print("sending request!")
-                    # requests.post("http://localhost:8080/face", json=name_map[name])
+                    requests.post("http://localhost:8080/face", json=name_map[name])
                     face_found = True
                     break
                 else:
@@ -108,7 +109,7 @@ while True:
                     print("sending reset")
                     reset = {"name": "reset", "id": "reset"}
                     interval_start_time = time.time()
-                    # requests.post("http://localhost:8080/face", json=reset)
+                    requests.post("http://localhost:8080/face", json=reset)
 
             face_names.append(name)
 
