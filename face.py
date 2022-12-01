@@ -37,6 +37,7 @@ name_map = {
     "Wild Bill": {"name": "William", "id": "GAnmE0SGijVVPkV2a5gZyZm65753"},
     "Jonah Eck": {"name": "Jonah", "id": "S5OezfUBMnWknbVyEP3PpqPPkMF3"},
     "Brad Hetrick": {"name": "Brad", "id": "Z8BhwkLaJdXUPeQjWBc1XDIngYp1"},
+    "Logan Rising": {"name": "Logan", "id": "GHDFA3g1ngVhqCZK1L0lFaMeL8K2"},
 }
 
 last_seen = None
@@ -52,6 +53,8 @@ while True:
         face_found = False
         # Resize frame of video to 1/5 size for faster face recognition processing
         small_frame = cv2.resize(frame, (0, 0), fx=0.2, fy=0.2)
+
+        small_frame = cv2.rotate(small_frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
 
         # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
         rgb_small_frame = small_frame[:, :, ::-1]
