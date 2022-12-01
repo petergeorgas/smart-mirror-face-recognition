@@ -35,6 +35,8 @@ process_this_frame = True
 name_map = {
     "Peter Georgas": {"name": "Peter", "id": "RQQo7YZKGeT1EHgZPP1mMg2twJh2"},
     "Wild Bill": {"name": "William", "id": "GAnmE0SGijVVPkV2a5gZyZm65753"},
+    "Jonah Eck": {"name": "Jonah", "id": "S5OezfUBMnWknbVyEP3PpqPPkMF3"},
+    "Brad Hetrick": {"name": "Brad", "id": "Z8BhwkLaJdXUPeQjWBc1XDIngYp1"},
 }
 
 last_seen = None
