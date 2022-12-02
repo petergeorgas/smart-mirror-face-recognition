@@ -44,6 +44,7 @@ last_seen = None
 
 interval_start_time = time.time()
 
+print("FACE FINDER STARTED...")
 while True:
     # Grab a single frame of video
     ret, frame = video_capture.read()
@@ -82,7 +83,10 @@ while True:
             if time_elapsed > 15:
                 print("sending reset")
                 reset = {"name": "reset", "id": "reset"}
-                requests.post("http://localhost:8080/face", json=reset)
+                try:
+                    requests.post("http://localhost:8080/face", json=reset)
+                except Exception:
+                    print("[ERROR] Failed to send reset signal to api gateway.")
                 last_seen = None
                 interval_start_time = time.time()
 
@@ -103,8 +107,12 @@ while True:
                     last_seen = name
                     print(f"i see {name}")
                     print("sending request!")
-                    requests.post("http://localhost:8080/face", json=name_map[name])
-                    face_found = True
+                    try:
+                        requests.post("http://localhost:8080/face", json=name_map[name])
+                        face_found = True
+                    except Exception:
+                        print("[ERROR] Failed to send reset signal to api gateway.")
+
                     break
                 else:
                     face_found = True
@@ -114,7 +122,10 @@ while True:
                 if time_elapsed > 15:
                     print("sending reset")
                     reset = {"name": "reset", "id": "reset"}
-                    requests.post("http://localhost:8080/face", json=reset)
+                    try:
+                        requests.post("http://localhost:8080/face", json=reset)
+                    except Exception as e:
+                        print("[ERROR] Failed to send face information to api gateway.")
                     last_seen = None
                     interval_start_time = time.time()
 
