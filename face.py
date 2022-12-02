@@ -105,8 +105,7 @@ while True:
 
                 if name != last_seen:
                     last_seen = name
-                    print(f"i see {name}")
-                    print("sending request!")
+                    print(f"{name} detected. Sending request.")
                     try:
                         requests.post("http://localhost:8080/face", json=name_map[name])
                         face_found = True
