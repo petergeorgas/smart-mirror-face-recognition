@@ -5,6 +5,8 @@ import face_recognition
 import cv2
 import numpy as np
 
+API_DOMAIN = "smartmirror.website"
+
 # Get a reference to webcam #0 (the default one)
 
 video_capture = cv2.VideoCapture(0)
@@ -85,7 +87,7 @@ try:
                     print("sending reset")
                     reset = {"name": "reset", "id": "reset"}
                     try:
-                        requests.post("http://localhost:8080/face", json=reset)
+                        requests.post(f"http://{API_DOMAIN}:8080/face", json=reset)
                     except Exception:
                         print("[ERROR] Failed to send reset signal to api gateway.")
                     last_seen = None
@@ -109,7 +111,7 @@ try:
                         print(f"{name} detected. Sending request.")
                         try:
                             requests.post(
-                                "http://localhost:8080/face", json=name_map[name]
+                                f"http://{API_DOMAIN}:8080/face", json=name_map[name]
                             )
                             face_found = True
                         except Exception:
@@ -125,7 +127,7 @@ try:
                         print("sending reset")
                         reset = {"name": "reset", "id": "reset"}
                         try:
-                            requests.post("http://localhost:8080/face", json=reset)
+                            requests.post(f"http://{API_DOMAIN}:8080/face", json=reset)
                         except Exception as e:
                             print(
                                 "[ERROR] Failed to send face information to api gateway."
