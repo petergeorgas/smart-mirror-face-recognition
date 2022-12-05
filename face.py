@@ -55,8 +55,8 @@ try:
         # Only process every other frame of video to save time
         if process_this_frame:
             face_found = False
-            # Resize frame of video to 1/5 size for faster face recognition processing
-            small_frame = cv2.resize(frame, (0, 0), fx=0.2, fy=0.2)
+            # Resize frame of video to 1/4 size for faster face recognition processing
+            small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
 
             small_frame = cv2.rotate(small_frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
 
@@ -161,6 +161,7 @@ try:
 
         process_this_frame = not process_this_frame
         if face_found:
+            print(f"I see someone: {last_seen}")
             print("timer started")
             time.sleep(15)
             print("timer expired")
