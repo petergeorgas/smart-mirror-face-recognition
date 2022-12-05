@@ -5,7 +5,7 @@ import face_recognition
 import cv2
 import numpy as np
 
-API_DOMAIN = "smartmirror.website"
+API_DOMAIN = "localhost"
 
 # Get a reference to webcam #0 (the default one)
 
@@ -53,118 +53,101 @@ try:
         ret, frame = video_capture.read()
 
         # Only process every other frame of video to save time
-        if process_this_frame:
+
+        face_found = False
+        # Resize frame of video to 1/4 size for faster face recognition processing
+        small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
+        small_frame = cv2.rotate(small_frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
+        # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
+        rgb_small_frame = small_frame[:, :, ::-1]
+        # Find all the faces and face encodings in the current frame of video
+        face_locations = face_recognition.face_locations(rgb_small_frame)
+        """
+        if len(face_locations) == 0 and time_elapsed > 15:
+            last_seen = None
+            interval_start_time = time.time()  # Reset the time interval
+            continue
+        """
+        face_encodings = face_recognition.face_encodings(
+            rgb_small_frame, face_locations
+        )
+        face_names = []
+        if len(face_encodings) == 0:  # No faces found
             face_found = False
-            # Resize frame of video to 1/5 size for faster face recognition processing
-            small_frame = cv2.resize(frame, (0, 0), fx=0.2, fy=0.2)
-
-            small_frame = cv2.rotate(small_frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
-
-            # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
-            rgb_small_frame = small_frame[:, :, ::-1]
-
-            # Find all the faces and face encodings in the current frame of video
-            face_locations = face_recognition.face_locations(rgb_small_frame)
-
-            """
-            if len(face_locations) == 0 and time_elapsed > 15:
+            now = time.time()
+            time_elapsed = now - interval_start_time
+            if time_elapsed > 15:
+                print("sending reset(no faces found in frame)")
+                reset = {"name": "reset", "id": "reset"}
+                try:
+                    requests.post(f"http://{API_DOMAIN}:8080/face", json=reset)
+                except Exception:
+                    print("[ERROR] Failed to send reset signal to api gateway.")
                 last_seen = None
-                interval_start_time = time.time()  # Reset the time interval
+                interval_start_time = time.time()
                 continue
-            """
-
-            face_encodings = face_recognition.face_encodings(
-                rgb_small_frame, face_locations
+        for face_encoding in face_encodings:
+            # See if the face is a match for the known face(s)
+            matches = face_recognition.compare_faces(
+                known_face_encodings, face_encoding
             )
-
-            face_names = []
-
-            if len(face_encodings) == 0:  # No faces found
-                face_found = False
-                now = time.time()
-                time_elapsed = now - interval_start_time
-                if time_elapsed > 15:
-                    print("sending reset")
-                    reset = {"name": "reset", "id": "reset"}
+            name = "Unknown"
+            # If a match was found in known_face_encodings, just use the first one.
+            if True in matches:
+                first_match_index = matches.index(True)
+                name = known_face_names[first_match_index]
+                if name != last_seen:
+                    last_seen = name
+                    print(f"{name} detected. Sending request.")
                     try:
-                        requests.post(f"http://{API_DOMAIN}:8080/face", json=reset)
+                        requests.post(
+                            f"http://{API_DOMAIN}:8080/face", json=name_map[name]
+                        )
                     except Exception:
                         print("[ERROR] Failed to send reset signal to api gateway.")
-                    last_seen = None
-                    interval_start_time = time.time()
+                    face_found = True
+                    break
+                else:
+                    face_found = True
+            """
+            # Or instead, use the known face with the smallest distance to the new face
+            face_distances = face_recognition.face_distance(
+                known_face_encodings, face_encoding
+            )
+            best_match_index = np.argmin(face_distances)
+            if matches[best_match_index]:
+                name = known_face_names[best_match_index]
+                if name != last_seen:
+                    last_seen = name
+                    print(f"i see {name}")
+                    print("sending request!")
+                    # requests.post("http://localhost:8080/face", json=name_map[name])
+                    face_found = True
+                    break
+                else:
+                    face_found = True
+            face_names.append(name)
+            """
 
-            for face_encoding in face_encodings:
-                # See if the face is a match for the known face(s)
-                matches = face_recognition.compare_faces(
-                    known_face_encodings, face_encoding
-                )
-
-                name = "Unknown"
-
-                # If a match was found in known_face_encodings, just use the first one.
-                if True in matches:
-                    first_match_index = matches.index(True)
-                    name = known_face_names[first_match_index]
-
-                    if name != last_seen:
-                        last_seen = name
-                        print(f"{name} detected. Sending request.")
-                        try:
-                            requests.post(
-                                f"http://{API_DOMAIN}:8080/face", json=name_map[name]
-                            )
-                            face_found = True
-                        except Exception:
-                            print("[ERROR] Failed to send reset signal to api gateway.")
-
-                        break
-                    else:
-                        face_found = True
-                else:  # No match found
-                    now = time.time()
-                    time_elapsed = now - interval_start_time
-                    if time_elapsed > 15:
-                        print("sending reset")
-                        reset = {"name": "reset", "id": "reset"}
-                        try:
-                            requests.post(f"http://{API_DOMAIN}:8080/face", json=reset)
-                        except Exception as e:
-                            print(
-                                "[ERROR] Failed to send face information to api gateway."
-                            )
-                        last_seen = None
-                        interval_start_time = time.time()
-
-                face_names.append(name)
-
-                """
-                # Or instead, use the known face with the smallest distance to the new face
-                face_distances = face_recognition.face_distance(
-                    known_face_encodings, face_encoding
-                )
-                best_match_index = np.argmin(face_distances)
-                if matches[best_match_index]:
-                    name = known_face_names[best_match_index]
-
-                    if name != last_seen:
-                        last_seen = name
-                        print(f"i see {name}")
-                        print("sending request!")
-                        # requests.post("http://localhost:8080/face", json=name_map[name])
-                        face_found = True
-                        break
-                    else:
-                        face_found = True
-
-                face_names.append(name)
-                """
-
-        process_this_frame = not process_this_frame
         if face_found:
+            print(f"I see someone: {last_seen}")
             print("timer started")
             time.sleep(15)
             print("timer expired")
             face_found = False
+        else:  # no known faces found
+            now = time.time()
+            time_elapsed = now - interval_start_time
+            if time_elapsed > 15:
+                print("sending reset (no known faces seen)")
+                reset = {"name": "reset", "id": "reset"}
+                try:
+                    requests.post(f"http://{API_DOMAIN}:8080/face", json=reset)
+                except Exception:
+                    print("[ERROR] Failed to send reset signal to api gateway.")
+                last_seen = None
+                face_found = False
+                interval_start_time = time.time()
 
         # This will not need to be displayed in actual implementation
 
