@@ -83,7 +83,6 @@ try:
                 face_found = False
                 now = time.time()
                 time_elapsed = now - interval_start_time
-                last_seen = None
                 if time_elapsed > 15:
                     print("sending reset")
                     reset = {"name": "reset", "id": "reset"}
