@@ -84,7 +84,7 @@ try:
                 now = time.time()
                 time_elapsed = now - interval_start_time
                 if time_elapsed > 15:
-                    print("sending reset")
+                    print("sending reset(no faces found in frame)")
                     reset = {"name": "reset", "id": "reset"}
                     try:
                         requests.post(f"http://{API_DOMAIN}:8080/face", json=reset)
@@ -154,7 +154,7 @@ try:
             now = time.time()
             time_elapsed = now - interval_start_time
             if time_elapsed > 15:
-                print("sending reset")
+                print("sending reset (no known faces seen)")
                 reset = {"name": "reset", "id": "reset"}
                 try:
                     requests.post(f"http://{API_DOMAIN}:8080/face", json=reset)
