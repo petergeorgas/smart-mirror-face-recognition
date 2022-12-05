@@ -80,6 +80,7 @@ try:
             face_names = []
 
             if len(face_encodings) == 0:  # No faces found
+                print("NO FACES FOUND")
                 face_found = False
                 now = time.time()
                 time_elapsed = now - interval_start_time
