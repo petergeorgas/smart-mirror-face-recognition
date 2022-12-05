@@ -167,6 +167,7 @@ try:
             time.sleep(15)
             print("timer expired")
             face_found = False
+            last_seen = None
 
         # This will not need to be displayed in actual implementation
 
