@@ -92,6 +92,7 @@ try:
                         print("[ERROR] Failed to send reset signal to api gateway.")
                     last_seen = None
                     interval_start_time = time.time()
+                    continue
 
             for face_encoding in face_encodings:
                 # See if the face is a match for the known face(s)
@@ -113,29 +114,12 @@ try:
                             requests.post(
                                 f"http://{API_DOMAIN}:8080/face", json=name_map[name]
                             )
-                            face_found = True
                         except Exception:
                             print("[ERROR] Failed to send reset signal to api gateway.")
-
+                        face_found = True
                         break
                     else:
                         face_found = True
-                else:  # No match found
-                    now = time.time()
-                    time_elapsed = now - interval_start_time
-                    if time_elapsed > 15:
-                        print("sending reset")
-                        reset = {"name": "reset", "id": "reset"}
-                        try:
-                            requests.post(f"http://{API_DOMAIN}:8080/face", json=reset)
-                        except Exception as e:
-                            print(
-                                "[ERROR] Failed to send face information to api gateway."
-                            )
-                        last_seen = None
-                        interval_start_time = time.time()
-
-                face_names.append(name)
 
                 """
                 # Or instead, use the known face with the smallest distance to the new face
@@ -166,6 +150,18 @@ try:
             time.sleep(15)
             print("timer expired")
             face_found = False
+        else:  # no known faces found
+            now = time.time()
+            time_elapsed = now - interval_start_time
+            if time_elapsed > 15:
+                print("sending reset")
+                reset = {"name": "reset", "id": "reset"}
+                try:
+                    requests.post(f"http://{API_DOMAIN}:8080/face", json=reset)
+                except Exception:
+                    print("[ERROR] Failed to send reset signal to api gateway.")
+                last_seen = None
+                interval_start_time = time.time()
 
         # This will not need to be displayed in actual implementation
 
