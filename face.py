@@ -40,6 +40,7 @@ name_map = {
     "Jonah Eck": {"name": "Jonah", "id": "S5OezfUBMnWknbVyEP3PpqPPkMF3"},
     "Brad Hetrick": {"name": "Brad", "id": "Z8BhwkLaJdXUPeQjWBc1XDIngYp1"},
     "Logan Rising": {"name": "Logan", "id": "GHDFA3g1ngVhqCZK1L0lFaMeL8K2"},
+    "Dr. Thomas": {"name": "Dr. Thomas", "id": "s6RmTDujgfU4swagmr1w6edNVr92"},
 }
 
 last_seen = None
